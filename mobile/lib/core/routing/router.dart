@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/auth/intro_auth_screen.dart';
 import '../../features/cart/cart_screen.dart';
 import '../../features/catalog/catalog_screen.dart';
 import '../../features/checkout/checkout_webview.dart';
 import '../../features/home/home_screen.dart';
+import '../../features/notifications/notifications_screen.dart';
 import '../../features/orders/orders_screen.dart';
 import '../../features/product/product_details_screen.dart';
 import '../../features/profile/profile_screen.dart';
 import '../../features/splash/splash_screen.dart';
+import '../../features/wishlist/wishlist_screen.dart';
 import '../../layouts/main_layout.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHome = GlobalKey<NavigatorState>();
 final _shellNavigatorCatalog = GlobalKey<NavigatorState>();
-final _shellNavigatorCart = GlobalKey<NavigatorState>();
+final _shellNavigatorWishlist = GlobalKey<NavigatorState>();
 final _shellNavigatorProfile = GlobalKey<NavigatorState>();
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -23,14 +26,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/splash',
     routes: [
       GoRoute(
-        path: '/splash',
+        path: '/',
+        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/splash',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/intro',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const IntroAuthScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainLayout(navigationShell: navigationShell);
         },
         branches: [
+          // Tab 0: Home
           StatefulShellBranch(
             navigatorKey: _shellNavigatorHome,
             routes: [
@@ -40,6 +55,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+          // Tab 1: Categories / Catalog
           StatefulShellBranch(
             navigatorKey: _shellNavigatorCatalog,
             routes: [
@@ -52,15 +68,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+          // Tab 2: Wishlist
           StatefulShellBranch(
-            navigatorKey: _shellNavigatorCart,
+            navigatorKey: _shellNavigatorWishlist,
             routes: [
               GoRoute(
-                path: '/cart',
-                builder: (context, state) => const CartScreen(),
+                path: '/wishlist',
+                builder: (context, state) => const WishlistScreen(),
               ),
             ],
           ),
+          // Tab 3: Profile
           StatefulShellBranch(
             navigatorKey: _shellNavigatorProfile,
             routes: [
@@ -71,6 +89,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
         ],
+      ),
+      GoRoute(
+        path: '/cart',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CartScreen(),
       ),
       GoRoute(
         path: '/product/:id',
@@ -92,6 +115,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/orders',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const OrdersScreen(),
+      ),
+      GoRoute(
+        path: '/notifications',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const NotificationsScreen(),
       ),
     ],
   );

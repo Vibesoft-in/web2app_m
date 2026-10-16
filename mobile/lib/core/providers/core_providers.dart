@@ -38,14 +38,22 @@ class AppConfigNotifier extends AsyncNotifier<AppConfig> {
   @override
   Future<AppConfig> build() async {
     final repo = ref.read(configRepositoryProvider);
-    return repo.getAppConfig();
+    try {
+      return await repo.getAppConfig();
+    } catch (_) {
+      return AppConfig.fallback();
+    }
   }
 
   Future<void> reload() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(configRepositoryProvider);
-      return repo.getAppConfig();
+      try {
+        return await repo.getAppConfig();
+      } catch (_) {
+        return AppConfig.fallback();
+      }
     });
   }
 }

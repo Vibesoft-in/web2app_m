@@ -88,11 +88,11 @@ class AppConfig {
       theme: const ThemeConfig(
         layout: 'theme_a',
         colors: ThemeColors(
-          primary: '#4F46E5',
-          secondary: '#1E293B',
+          primary: '#704FEE',
+          secondary: '#1E1B4B',
           background: '#FFFFFF',
-          surface: '#F8FAFC',
-          text: '#0F172A',
+          surface: '#F9FAFB',
+          text: '#1E1B4B',
         ),
         radius: 12.0,
         font: 'Poppins',
@@ -106,6 +106,15 @@ class AppConfig {
         reviews: false,
       ),
       home: const [
+        HomeSection(
+          type: 'banner',
+          items: [
+            BannerItem(
+              image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800&q=80',
+              link: '',
+            ),
+          ],
+        ),
         HomeSection(type: 'categories'),
         HomeSection(type: 'product_rail', title: 'Trending Products', source: 'recent'),
       ],

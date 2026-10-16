@@ -29,7 +29,6 @@ class OrdersScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ordersAsync = ref.watch(ordersProvider);
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text('My Orders')),
@@ -81,7 +80,7 @@ class OrdersScreen extends ConsumerWidget {
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: status == 'COMPLETED'
-                                    ? Colors.emerald.withOpacity(0.1)
+                                    ? const Color(0xFF059669).withOpacity(0.1)
                                     : Colors.blue.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
