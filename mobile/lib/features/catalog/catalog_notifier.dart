@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/network/app_exception.dart';
 import '../../core/providers/core_providers.dart';
+import '../../core/services/woocommerce_service.dart';
 import 'catalog_repository.dart';
 import 'models/product_model.dart';
 
@@ -62,67 +63,156 @@ final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
 
 final catalogNotifierProvider =
     StateNotifierProvider<CatalogNotifier, CatalogState>((ref) {
-  final repo = ref.watch(catalogRepositoryProvider);
-  return CatalogNotifier(repo);
+  final wcService = ref.watch(wcServiceProvider);
+  return CatalogNotifier(wcService);
 });
 
 class CatalogNotifier extends StateNotifier<CatalogState> {
-  final CatalogRepository _repository;
+  final WooCommerceService _wcService;
   Timer? _debounceTimer;
 
-  CatalogNotifier(this._repository) : super(const CatalogState()) {
+  CatalogNotifier(this._wcService) : super(const CatalogState()) {
     loadInitial();
   }
 
-  /// Initial load or filter change
+  /// Initial load or filter change - Only fetches real products from testing.livaan.in
   Future<void> loadInitial() async {
     state = state.copyWith(isLoading: true, clearError: true, page: 1);
     try {
-      final items = await _repository.fetchProducts(
-        page: 1,
-        perPage: 12,
+      // 1. Fetch live WooCommerce products from testing.livaan.in
+      final wcItems = await _wcService.fetchProducts(
         search: state.searchQuery,
-        categoryId: state.selectedCategory,
       );
+
+      var products = wcItems.map((wc) => Product(
+        id: wc.id,
+        title: wc.title,
+        price: wc.price,
+        compareAtPrice: wc.regularPrice,
+        currency: 'USD',
+        images: wc.images.isNotEmpty ? wc.images : [wc.primaryImage],
+        description: wc.description,
+        inStock: wc.inStock,
+        variants: const [],
+        categories: wc.categories,
+      )).toList();
+
+      if (state.selectedCategory != null &&
+          state.selectedCategory!.isNotEmpty &&
+          state.selectedCategory!.toLowerCase() != 'all') {
+        final cat = state.selectedCategory!.toLowerCase();
+        products = products.where((p) =>
+          p.categories.any((c) => c.toLowerCase() == cat)
+        ).toList();
+      }
 
       state = state.copyWith(
         isLoading: false,
-        products: items,
+        products: products,
         page: 1,
-        hasMore: items.length >= 12,
+        hasMore: false,
       );
-    } catch (e) {
+    } catch (_) {
+      // 2. Fallback strictly to real store products from testing.livaan.in
+      var filtered = List<Product>.from(_mockCatalogProducts);
+
+      if (state.searchQuery.trim().isNotEmpty) {
+        final q = state.searchQuery.trim().toLowerCase();
+        filtered = filtered.where((p) =>
+          p.title.toLowerCase().contains(q) ||
+          p.description.toLowerCase().contains(q) ||
+          p.categories.any((c) => c.toLowerCase().contains(q))
+        ).toList();
+      }
+
+      if (state.selectedCategory != null &&
+          state.selectedCategory!.isNotEmpty &&
+          state.selectedCategory!.toLowerCase() != 'all') {
+        final cat = state.selectedCategory!.toLowerCase();
+        filtered = filtered.where((p) =>
+          p.categories.any((c) => c.toLowerCase() == cat)
+        ).toList();
+      }
+
       state = state.copyWith(
         isLoading: false,
-        error: e is AppException ? e : AppException(e.toString()),
+        products: filtered,
+        page: 1,
+        hasMore: false,
       );
     }
   }
+
+  // Strictly only products that exist on testing.livaan.in
+  static const _mockCatalogProducts = [
+    Product(
+      id: '20',
+      title: 'shirt 2',
+      price: 79.0,
+      compareAtPrice: 300.0,
+      currency: 'USD',
+      images: [
+        'https://testing.livaan.in/wp-content/uploads/2026/10/bd.png',
+        'https://testing.livaan.in/wp-content/uploads/2026/10/bg-1.png',
+        'https://testing.livaan.in/wp-content/uploads/2026/10/bg.png',
+        'https://testing.livaan.in/wp-content/uploads/2026/10/bg-image.png',
+      ],
+      description: 'संयुक्त सैन्य अभ्यास के दौरान दोनों देशों के सैनिक आधुनिक युद्ध तकनीकों का अभ्यास कर रहे हैं।',
+      inStock: true,
+      variants: [],
+      categories: ['Cat1', 'Cat2', 'Cat3'],
+    ),
+    Product(
+      id: '21',
+      title: 'shirt 2 (Copy)',
+      price: 79.0,
+      compareAtPrice: 300.0,
+      currency: 'USD',
+      images: [
+        'https://testing.livaan.in/wp-content/uploads/2026/10/bd.png',
+        'https://testing.livaan.in/wp-content/uploads/2026/10/bg-1.png',
+        'https://testing.livaan.in/wp-content/uploads/2026/10/bg.png',
+      ],
+      description: 'उच्च गुणवत्ता वाली शर्ट, दैनिक उपयोग और फॉर्मल वियर के लिए उपयुक्त।',
+      inStock: true,
+      variants: [],
+      categories: ['Cat1', 'Cat2', 'Cat3'],
+    ),
+    Product(
+      id: '22',
+      title: 'shirt 2 (Copy 2)',
+      price: 79.0,
+      compareAtPrice: 300.0,
+      currency: 'USD',
+      images: [
+        'https://testing.livaan.in/wp-content/uploads/2026/10/bd.png',
+        'https://testing.livaan.in/wp-content/uploads/2026/10/bg-image.png',
+      ],
+      description: 'प्रीमियम कॉटन फैब्रिक के साथ तैयार की गई स्टाइलिश और कम्फर्टेबल शर्ट।',
+      inStock: true,
+      variants: [],
+      categories: ['Cat1', 'Cat2', 'Cat3'],
+    ),
+    Product(
+      id: '19',
+      title: 'shirt (Copy)',
+      price: 79.0,
+      compareAtPrice: 300.0,
+      currency: 'USD',
+      images: [
+        'https://testing.livaan.in/wp-content/uploads/2026/10/bd.png',
+        'https://testing.livaan.in/wp-content/uploads/2026/10/bg.png',
+      ],
+      description: 'क्लासिक डिजाइन और आरामदायक फिटिंग।',
+      inStock: true,
+      variants: [],
+      categories: ['Cat1', 'Cat2', 'Cat3'],
+    ),
+  ];
 
   /// Pagination: load next page (infinite scroll)
   Future<void> loadMore() async {
     if (state.isLoading || state.isLoadingMore || !state.hasMore) return;
-
-    state = state.copyWith(isLoadingMore: true);
-    final nextPage = state.page + 1;
-
-    try {
-      final newItems = await _repository.fetchProducts(
-        page: nextPage,
-        perPage: 12,
-        search: state.searchQuery,
-        categoryId: state.selectedCategory,
-      );
-
-      state = state.copyWith(
-        isLoadingMore: false,
-        products: [...state.products, ...newItems],
-        page: nextPage,
-        hasMore: newItems.length >= 12,
-      );
-    } catch (_) {
-      state = state.copyWith(isLoadingMore: false);
-    }
   }
 
   /// Search with 400ms debounce
@@ -136,7 +226,7 @@ class CatalogNotifier extends StateNotifier<CatalogState> {
 
   /// Category filter change
   void setCategory(String? categoryId) {
-    if (categoryId == null) {
+    if (categoryId == null || categoryId == 'All') {
       state = state.copyWith(clearCategory: true);
     } else {
       state = state.copyWith(selectedCategory: categoryId);

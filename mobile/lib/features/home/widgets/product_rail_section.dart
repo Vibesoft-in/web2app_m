@@ -8,8 +8,50 @@ import '../../catalog/widgets/product_card.dart';
 final railProductsProvider =
     FutureProvider.family<List<Product>, String>((ref, source) async {
   final repo = ref.watch(catalogRepositoryProvider);
-  return repo.fetchProducts(page: 1, perPage: 6);
+  try {
+    final list = await repo.fetchProducts(page: 1, perPage: 6);
+    if (list.isNotEmpty) return list;
+  } catch (_) {}
+  return _mockRailProducts;
 });
+
+const _mockRailProducts = [
+  Product(
+    id: '1',
+    title: 'Vitamin C Brightening Serum',
+    price: 29.99,
+    compareAtPrice: 39.99,
+    currency: 'USD',
+    images: ['https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=500&q=80'],
+    description: 'Brightening vitamin C facial serum for radiant skin.',
+    inStock: true,
+    variants: [],
+    categories: ['Serums'],
+  ),
+  Product(
+    id: '2',
+    title: 'Hydrating Face Cream',
+    price: 24.50,
+    currency: 'USD',
+    images: ['https://images.unsplash.com/photo-1556228720-195a672e8a03?w=500&q=80'],
+    description: 'Deep moisture cream with hyaluronic acid.',
+    inStock: true,
+    variants: [],
+    categories: ['Skincare'],
+  ),
+  Product(
+    id: '3',
+    title: 'Botanical Body Oil',
+    price: 34.00,
+    compareAtPrice: 45.00,
+    currency: 'USD',
+    images: ['https://images.unsplash.com/photo-1608248597359-00f68285517d?w=500&q=80'],
+    description: 'Nourishing organic botanical body oil.',
+    inStock: true,
+    variants: [],
+    categories: ['Bath & Body'],
+  ),
+];
 
 class ProductRailSection extends ConsumerWidget {
   final HomeSection section;

@@ -27,6 +27,29 @@ class WhiteLabelApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: theme,
       routerConfig: router,
+      builder: (context, child) {
+        return Container(
+          color: const Color(0xFFF1F5F9), // modern soft background on desktop/tablet
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 24,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipRect(child: child ?? const SizedBox.shrink()),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
