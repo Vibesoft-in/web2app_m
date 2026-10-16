@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { apiClient } from "@/lib/api-client";
-import { ArrowRight, Loader2, Sparkles, Store } from "lucide-react";
+import { ArrowRight, Loader2, Palette, Sparkles, Store } from "lucide-react";
 
 const newAppSchema = z.object({
   name: z.string().min(2, "App name must be at least 2 characters").max(50),
@@ -19,6 +19,19 @@ export default function NewAppPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [selectedThemeInfo, setSelectedThemeInfo] = useState<{ name: string; price?: string } | null>(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("appifyhub_selected_theme");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.name) {
+          setSelectedThemeInfo({ name: parsed.name, price: parsed.price });
+        }
+      }
+    } catch {}
+  }, []);
 
   const {
     register,
@@ -73,6 +86,21 @@ export default function NewAppPage() {
             Let's start by naming your app and choosing your e-commerce platform.
           </p>
         </div>
+
+        {selectedThemeInfo && (
+          <div className="mb-6 p-3 rounded-xl bg-amber-50/70 border border-amber-200/90 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <Palette className="w-4 h-4 text-amber-800 flex-shrink-0" />
+              <span className="text-slate-700">
+                Active Theme: <strong className="text-amber-950">{selectedThemeInfo.name}</strong>{" "}
+                {selectedThemeInfo.price && <span className="text-amber-900">({selectedThemeInfo.price})</span>}
+              </span>
+            </div>
+            <span className="text-[11px] font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded-full">
+              Ready to apply
+            </span>
+          </div>
+        )}
 
         {errorMsg && (
           <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm">

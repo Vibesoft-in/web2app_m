@@ -10,31 +10,33 @@ namespace App\Enums;
  */
 enum SetupStep: string
 {
-    case Platform     = 'platform';
-    case Connect      = 'connect';
-    case Analysis     = 'analysis';
-    case Features     = 'features';
-    case Theme        = 'theme';
-    case Branding     = 'branding';
-    case Preview      = 'preview';
-    case Integrations = 'integrations';
-    case Payment      = 'payment';
-    case Build        = 'build';
+    case Platform       = 'platform';
+    case Connect        = 'connect';
+    case Analysis       = 'analysis';
+    case DataCollection = 'data-collection';
+    case Features       = 'features';
+    case Theme          = 'theme';
+    case Branding       = 'branding';
+    case Preview        = 'preview';
+    case Integrations   = 'integrations';
+    case Payment        = 'payment';
+    case Build          = 'build';
 
     /** Numeric order (0-based) for step comparison. */
     public function order(): int
     {
         return match ($this) {
-            self::Platform     => 0,
-            self::Connect      => 1,
-            self::Analysis     => 2,
-            self::Features     => 3,
-            self::Theme        => 4,
-            self::Branding     => 5,
-            self::Preview      => 6,
-            self::Integrations => 7,
-            self::Payment      => 8,
-            self::Build        => 9,
+            self::Platform       => 0,
+            self::Connect        => 1,
+            self::Analysis       => 2,
+            self::DataCollection => 3,
+            self::Features       => 4,
+            self::Theme          => 5,
+            self::Branding       => 6,
+            self::Preview        => 7,
+            self::Integrations   => 8,
+            self::Payment        => 9,
+            self::Build          => 10,
         };
     }
 

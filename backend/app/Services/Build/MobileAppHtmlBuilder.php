@@ -190,14 +190,35 @@ class MobileAppHtmlBuilder
 
         $primaryColor = $config['theme']['colors']['primary'] ?? '#4F46E5';
         $secondaryColor = $config['theme']['colors']['secondary'] ?? '#0F172A';
+        $bgColor = $config['theme']['colors']['background'] ?? '#F8FAFC';
+        $surfaceColor = $config['theme']['colors']['surface'] ?? '#FFFFFF';
+        $textColor = $config['theme']['colors']['text'] ?? '#0F172A';
+        $radius = (int) ($config['theme']['radius'] ?? 16);
         $accentColor = '#E11D48';
 
-        $logoUrl = $config['app']['logo_url'] ?? ($config['theme']['logo_url'] ?? '');
-        $logoHeaderHtml = !empty($logoUrl)
-            ? "<img src=\"{$logoUrl}\" class=\"brand-logo-img\" alt=\"{$appName}\" style=\"width: 32px; height: 32px; object-fit: contain; border-radius: 8px; background: white; padding: 2px; border: 1px solid rgba(0,0,0,0.06);\">"
-            : "<div class=\"brand-logo\">{$appName[0]}</div>";
-        $splashLogoHtml = !empty($logoUrl)
-            ? "<img src=\"{$logoUrl}\" alt=\"{$appName}\" style=\"width: 76px; height: 76px; object-fit: contain; border-radius: 20px; margin: 0 auto 16px auto; display: block; box-shadow: 0 10px 25px rgba(0,0,0,0.15); background: white; padding: 6px;\">"
+        // Typography Support (Google Fonts)
+        $selectedFont = $config['theme']['font'] ?? 'Poppins';
+        $googleFontParam = match ($selectedFont) {
+            'Plus Jakarta Sans' => 'family=Plus+Jakarta+Sans:wght@400;500;600;700;800',
+            'Inter'             => 'family=Inter:wght@400;500;600;700;800',
+            'Roboto'            => 'family=Roboto:wght@400;500;700;900',
+            'Outfit'            => 'family=Outfit:wght@400;500;600;700;800',
+            'Playfair Display'  => 'family=Playfair+Display:wght@400;600;700;800',
+            'Montserrat'       => 'family=Montserrat:wght@400;500;600;700;800',
+            default             => 'family=Poppins:wght@400;500;600;700;800',
+        };
+        $googleFontLink = "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n  <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n  <link href=\"https://fonts.googleapis.com/css2?{$googleFontParam}&display=swap\" rel=\"stylesheet\">";
+        $fontFamilyCss = "'{$selectedFont}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+
+        $rawLogoUrl = $config['app']['logo_url'] ?? ($config['theme']['logo_url'] ?? '');
+        $cleanLogo = self::sanitizeLogo((string) $rawLogoUrl);
+        $firstChar = htmlspecialchars(!empty($appName) ? mb_substr($appName, 0, 1) : 'S', ENT_QUOTES, 'UTF-8');
+
+        $logoHeaderHtml = !empty($cleanLogo)
+            ? "<img src=\"{$cleanLogo}\" class=\"brand-logo-img\" alt=\"{$appName}\" onerror=\"this.outerHTML='<div class=\\\'brand-logo\\\'>{$firstChar}</div>';\">"
+            : "<div class=\"brand-logo\">{$firstChar}</div>";
+        $splashLogoHtml = !empty($cleanLogo)
+            ? "<img src=\"{$cleanLogo}\" alt=\"{$appName}\" style=\"width: 76px; height: 76px; object-fit: contain; border-radius: 20px; margin: 0 auto 16px auto; display: block; box-shadow: 0 10px 25px rgba(0,0,0,0.15); background: white; padding: 6px;\" onerror=\"this.outerHTML='<div class=\\\'splash-logo\\\'><svg viewBox=\\\'0 0 24 24\\\'><path d=\\\'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z\\\'/><line x1=\\\'3\\\' y1=\\\'6\\\' x2=\\\'21\\\' y2=\\\'6\\\'/><path d=\\\'M16 10a4 4 0 0 1-8 0\\\'/></svg></div>';\">"
             : "<div class=\"splash-logo\"><svg viewBox=\"0 0 24 24\"><path d=\"M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z\"/><line x1=\"3\" y1=\"6\" x2=\"21\" y2=\"6\"/><path d=\"M16 10a4 4 0 0 1-8 0\"/></svg></div>";
 
         $storeUrl = $app->connection?->store_url ?: ($app->connection?->site_url ?: '');
@@ -211,18 +232,20 @@ class MobileAppHtmlBuilder
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>{$appName}</title>
+  {$googleFontLink}
   <style>
     :root {
       --primary: {$primaryColor};
       --primary-light: {$primaryColor}18;
       --secondary: {$secondaryColor};
       --accent: {$accentColor};
-      --bg: #F8FAFC;
-      --surface: #FFFFFF;
-      --text: #0F172A;
+      --bg: {$bgColor};
+      --surface: {$surfaceColor};
+      --text: {$textColor};
       --text-muted: #64748B;
       --border: #E2E8F0;
-      --radius: 16px;
+      --radius: {$radius}px;
+      --app-font: {$fontFamilyCss};
     }
 
     * {
@@ -231,10 +254,15 @@ class MobileAppHtmlBuilder
       padding: 0;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+      font-family: inherit;
+    }
+
+    body, button, input, select, textarea {
+      font-family: var(--app-font);
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: var(--app-font);
       background: var(--bg);
       color: var(--text);
       overflow-x: hidden;
@@ -430,6 +458,16 @@ class MobileAppHtmlBuilder
       font-weight: 800;
       font-size: 16px;
       box-shadow: 0 4px 10px rgba(79,70,229,0.3);
+    }
+    .brand-logo-img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      border-radius: 10px;
+      background: white;
+      padding: 3px;
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     }
     .brand-name {
       font-weight: 800;
@@ -999,7 +1037,7 @@ class MobileAppHtmlBuilder
       <div style="padding: 20px 18px;">
         <div style="background: white; border-radius: var(--radius); border: 1px solid var(--border); padding: 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
           <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800;">
-            {$appName[0]}
+            {$firstChar}
           </div>
           <div>
             <h3 style="font-size: 16px; font-weight: 800;">Welcome Shopper</h3>
@@ -1595,5 +1633,29 @@ class MobileAppHtmlBuilder
 </body>
 </html>
 HTML;
+    }
+
+    public static function sanitizeLogo(string $url): string
+    {
+        $url = trim($url);
+        if (empty($url)) {
+            return '';
+        }
+
+        if (str_starts_with($url, 'data:image/svg+xml')) {
+            if (str_contains($url, 'base64,')) {
+                return $url;
+            }
+            $commaPos = strpos($url, ',');
+            if ($commaPos !== false) {
+                $svgContent = substr($url, $commaPos + 1);
+                $svgContent = rawurldecode($svgContent);
+                return 'data:image/svg+xml;base64,' . base64_encode($svgContent);
+            }
+        } elseif (str_starts_with($url, '<svg')) {
+            return 'data:image/svg+xml;base64,' . base64_encode($url);
+        }
+
+        return htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
     }
 }

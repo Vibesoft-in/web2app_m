@@ -8,6 +8,7 @@ import { apiClient } from "@/lib/api-client";
 import { StepPlatform } from "@/components/wizard/step-platform";
 import { StepConnect } from "@/components/wizard/step-connect";
 import { StepAnalysis } from "@/components/wizard/step-analysis";
+import { StepDataCollection } from "@/components/wizard/step-data-collection";
 import { StepFeatures } from "@/components/wizard/step-features";
 import { StepTheme } from "@/components/wizard/step-theme";
 import { StepBranding } from "@/components/wizard/step-branding";
@@ -21,6 +22,7 @@ const STEPS = [
   { key: "platform", label: "Platform" },
   { key: "connect", label: "Connect" },
   { key: "analysis", label: "Score" },
+  { key: "data-collection", label: "Data Collection" },
   { key: "features", label: "Features" },
   { key: "theme", label: "Theme" },
   { key: "branding", label: "Branding" },
@@ -83,7 +85,7 @@ export default function WizardStepPage() {
   const currentStep = STEPS[currentStepIndex] || STEPS[0];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       {/* ── TOP HEADER WITH BACK TO DASHBOARD BUTTON ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <Link
@@ -95,7 +97,7 @@ export default function WizardStepPage() {
         </Link>
 
         <div className="flex items-center gap-2 text-xs text-slate-500">
-          <span>Editing Step {currentStepIndex + 1} of 10:</span>
+          <span>Editing Step {currentStepIndex + 1} of {STEPS.length}:</span>
           <span className="font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-200/60 px-2.5 py-0.5 rounded-full">
             {currentStep.label}
           </span>
@@ -228,6 +230,9 @@ export default function WizardStepPage() {
         )}
         {currentStepParam === "analysis" && (
           <StepAnalysis ulid={ulid} app={state?.app} onNext={navigateNext} />
+        )}
+        {currentStepParam === "data-collection" && (
+          <StepDataCollection ulid={ulid} onNext={navigateNext} />
         )}
         {currentStepParam === "features" && (
           <StepFeatures ulid={ulid} onNext={navigateNext} />

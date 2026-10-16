@@ -194,8 +194,9 @@ class BuildController extends Controller
             $formatSpecificPath = "{$dir}/{$filenameWithoutExt}.{$format}";
             $fullPath = Storage::disk('local')->path($formatSpecificPath);
 
-            // Self-healing: if file missing or build not marked ready, compile real APK on the fly
-            if (! file_exists($fullPath) || $build->status !== BuildStatus::Ready) {
+            // Self-healing: if file missing, smaller than 1KB (mock/corrupt), or build not marked ready, compile real APK on the fly
+            $isCorruptOrDummy = file_exists($fullPath) && filesize($fullPath) < 1024;
+            if (! file_exists($fullPath) || $isCorruptOrDummy || $build->status !== BuildStatus::Ready) {
                 $aabFullPath = Storage::disk('local')->path("{$dir}/{$filenameWithoutExt}.aab");
                 $apkFullPath = Storage::disk('local')->path("{$dir}/{$filenameWithoutExt}.apk");
                 $targetDir = dirname($apkFullPath);
@@ -211,7 +212,7 @@ class BuildController extends Controller
                     ]);
                     $fullPath = Storage::disk('local')->path($formatSpecificPath);
                 } catch (\Throwable $e) {
-                    if (! file_exists($fullPath)) {
+                    if (! file_exists($fullPath) || filesize($fullPath) < 1024) {
                         return response()->json(['error' => 'Artifact generation error: ' . $e->getMessage()], 404);
                     }
                 }

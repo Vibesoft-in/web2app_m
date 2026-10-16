@@ -143,9 +143,12 @@ class BuildWorker
                     $sdkLogs = \App\Services\Build\NativeApkGenerator::generate($app, $build, $apkStoragePath, $aabStoragePath);
                     $logs = array_merge($logs, $sdkLogs);
                 } catch (\Throwable $e) {
-                    $logs[] = "[FALLBACK ENGINE] Compiler note: " . $e->getMessage();
-                    file_put_contents($aabStoragePath, 'PK_AAB_BINARY_PACKAGE_'.substr(md5($app->ulid), 0, 16));
-                    file_put_contents($apkStoragePath, 'PK_APK_BINARY_PACKAGE_'.substr(md5($app->ulid), 0, 16));
+                    $logs[] = "[APK ENGINE ERROR] " . $e->getMessage();
+                    $build->update([
+                        'status' => BuildStatus::Failed,
+                        'error'  => 'APK compilation error: ' . $e->getMessage(),
+                    ]);
+                    throw new RuntimeException("APK generation failed: " . $e->getMessage(), 0, $e);
                 }
             }
 

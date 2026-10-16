@@ -109,35 +109,69 @@ export function StepBranding({ ulid, onNext }: StepBrandingProps) {
       })
       .catch(() => {});
 
-    apiClient(`/api/apps/${ulid}/preview-data`)
+    apiClient(`/api/apps/${ulid}/website-data`)
       .then((res) => {
-        if (!isMounted) return;
-        if (res?.store_name) {
+        if (!isMounted || !res) return;
+        if (res.store_name) {
           setAppName((prev) => (prev && prev !== "Glow Beauty" ? prev : res.store_name));
         }
-        if (res?.store_url) {
-          setStoreUrl(res.store_url);
-          const clean = res.store_url.replace(/\/+$/, "");
-          setWebsiteLogo(`${clean}/favicon.ico`);
+        if (res.website_url) {
+          setStoreUrl(res.website_url);
         }
-        if (res?.website_logo) {
-          setWebsiteLogo(res.website_logo);
+        if (res.brand?.logo_url) {
+          setWebsiteLogo(res.brand.logo_url);
+          setLogoUrl((prev) => (prev && !prev.startsWith("data:image/svg+xml") ? prev : res.brand.logo_url));
+          setLogoMode("website");
+        }
+        if (res.brand?.colors?.primary) {
+          setPrimaryColor(res.brand.colors.primary);
+        }
+        if (res.brand?.colors?.secondary) {
+          setSecondaryColor(res.brand.colors.secondary);
+        }
+        if (res.brand?.font_heading) {
+          setFont(res.brand.font_heading);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        // Fallback to preview-data or localStorage
+        apiClient(`/api/apps/${ulid}/preview-data`)
+          .then((res) => {
+            if (!isMounted) return;
+            if (res?.store_name) {
+              setAppName((prev) => (prev && prev !== "Glow Beauty" ? prev : res.store_name));
+            }
+            if (res?.store_url) {
+              setStoreUrl(res.store_url);
+              const clean = res.store_url.replace(/\/+$/, "");
+              setWebsiteLogo(`${clean}/favicon.ico`);
+            }
+            if (res?.website_logo) {
+              setWebsiteLogo(res.website_logo);
+              setLogoUrl((prev) => (prev && !prev.startsWith("data:image/svg+xml") ? prev : res.website_logo));
+              setLogoMode("website");
+            }
+          })
+          .catch(() => {});
+      });
 
     return () => {
       isMounted = false;
     };
   }, [ulid]);
 
-  // Set default dummy logo if none selected
+  // Fallback to website logo or first preset if nothing set
   useEffect(() => {
-    if (!logoUrl && DUMMY_LOGOS[0]) {
-      setLogoUrl(DUMMY_LOGOS[0].svg);
-      setLogoMode("dummy");
+    if (!logoUrl) {
+      if (websiteLogo) {
+        setLogoUrl(websiteLogo);
+        setLogoMode("website");
+      } else if (DUMMY_LOGOS[0]) {
+        setLogoUrl(DUMMY_LOGOS[0].svg);
+        setLogoMode("dummy");
+      }
     }
-  }, [logoUrl]);
+  }, [logoUrl, websiteLogo]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -212,6 +246,19 @@ export function StepBranding({ ulid, onNext }: StepBrandingProps) {
         <p className="text-sm text-slate-500 mt-1">
           Choose a logo for your mobile application, or use the same logo as your website or select from our curated dummy logos.
         </p>
+      </div>
+
+      {/* Website Brand Synced Banner */}
+      <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-amber-700 flex-shrink-0" />
+          <span className="text-slate-700">
+            <strong>Website Brand Synced:</strong> Logo, typography ({font}), and brand color codes ({primaryColor}) automatically imported from your website.
+          </span>
+        </div>
+        <span className="text-[11px] font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300 self-start sm:self-auto">
+          ✓ Synced from Website
+        </span>
       </div>
 
       {errorMsg && (

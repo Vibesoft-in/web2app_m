@@ -1,32 +1,45 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 15, 23, 42;
-  --background-start-rgb: 248, 250, 252;
+  /* Design Tokens from webtoapp.livaan.in */
+  --bg-page: #FFFFFF;
+  --bg-strip: #F7F5F0;
+  --bg-card: #FFFFFF;
+  --bg-tinted: #F9F7F4;
+  --bg-bubble: #F3EEE7;
+  --text-heading: #1C1917;
+  --text-body: #57514B;
+  --text-muted: #7E756B;
+  --accent-bronze: #78593D;
+  --accent-light-bronze: #A68A70;
+  --border-subtle: #EBE6DF;
+  --border-line: #E2DBD0;
+  --btn-bg: #EFEAE2;
+  --btn-border: #78593D;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-pill: 9999px;
+  --shadow-soft: 0 10px 30px -5px rgba(44, 38, 33, 0.06);
+
+  --foreground-rgb: 28, 25, 23;
+  --background-start-rgb: 247, 245, 240;
   --background-end-rgb: 255, 255, 255;
 }
 
 html {
-  overflow-x: hidden;
   max-width: 100vw;
   width: 100%;
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background-color: var(--bg-strip);
   min-height: 100vh;
-  overflow-x: hidden;
   max-width: 100vw;
   width: 100%;
 }
@@ -42,5 +55,24 @@ body {
   .no-scrollbar {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
+  }
+
+  /* Slim modern custom scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 9999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+  }
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #CBD5E1 transparent;
   }
 }

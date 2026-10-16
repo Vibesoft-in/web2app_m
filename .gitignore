@@ -48,3 +48,5 @@ service-account*.json
 Thumbs.db
 .idea/
 .vscode/
+*.tsbuildinfo
+backend/cacert.pem

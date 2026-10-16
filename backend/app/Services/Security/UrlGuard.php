@@ -143,10 +143,21 @@ class UrlGuard
 
         while (true) {
             try {
+                $clientOptions = [];
+                if (isset($options['verify'])) {
+                    $clientOptions['verify'] = $options['verify'];
+                } elseif (file_exists(base_path('cacert.pem'))) {
+                    $clientOptions['verify'] = base_path('cacert.pem');
+                }
+
                 /** @var \Illuminate\Http\Client\PendingRequest $client */
                 $client = Http::timeout($timeout)
                     ->withoutRedirecting()
                     ->withHeaders($options['headers'] ?? []);
+
+                if (! empty($clientOptions)) {
+                    $client = $client->withOptions($clientOptions);
+                }
 
                 if (isset($options['auth']) && is_array($options['auth'])) {
                     $client = $client->withBasicAuth($options['auth'][0], $options['auth'][1]);

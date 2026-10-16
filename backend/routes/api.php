@@ -258,6 +258,18 @@ Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
         ->name('api.apps.preview-data')
         ->middleware('step:connect');
 
+    // Website data calculation, brand extraction & auto-collection
+    Route::get('/apps/{ulid}/website-data', [\App\Http\Controllers\Api\ConfigController::class, 'getWebsiteData'])
+        ->name('api.apps.website-data')
+        ->middleware('step:connect');
+
+    Route::post('/apps/{ulid}/website-data/apply', [\App\Http\Controllers\Api\ConfigController::class, 'applyWebsiteData'])
+        ->name('api.apps.website-data.apply')
+        ->middleware('step:connect');
+
+    Route::post('/apps/{ulid}/upload-asset', [\App\Http\Controllers\Api\ConfigController::class, 'uploadAsset'])
+        ->name('api.apps.upload-asset');
+
     // ── Android Build Pipeline ───────────────────────────────────────────────
     Route::get('/apps/{ulid}/builds', [\App\Http\Controllers\Api\BuildController::class, 'index'])
         ->name('api.apps.builds.index');

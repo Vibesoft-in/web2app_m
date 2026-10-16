@@ -219,15 +219,32 @@ class ConfigValidator
     }
 
     /**
-     * Checks if a URL is a valid, secure HTTPS URL.
+     * Checks if a URL is a valid, secure HTTPS URL or valid image data URI.
      */
     private function isHttpsUrl(string $url): bool
     {
-        if (strlen($url) > 1000) {
+        $lower = strtolower(trim($url));
+
+        // Allow data URIs for uploaded banners and icons
+        if (str_starts_with($lower, 'data:image/')) {
+            return true;
+        }
+
+        // Allow relative asset or storage paths
+        if (str_starts_with($lower, '/')) {
+            return true;
+        }
+
+        // Allow local dev URLs
+        if (str_starts_with($lower, 'http://localhost') || str_starts_with($lower, 'http://127.0.0.1')) {
+            return true;
+        }
+
+        if (strlen($url) > 2048) {
             return false;
         }
 
-        if (! str_starts_with(strtolower($url), 'https://')) {
+        if (! str_starts_with($lower, 'https://')) {
             return false;
         }
 

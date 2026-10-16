@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "WebIntoApp — Convert WooCommerce & Shopify into Native Mobile Apps",
-  description: "Turn your e-commerce store into a high-converting white-label iOS and Android app in minutes.",
+  title: "Turn Your Website into iOS & Android Mobile Apps — AppifyHub",
+  description: "Turn your WordPress, WooCommerce or Shopify website into a beautiful mobile app — quickly, easily and without coding.",
 };
 
 export const viewport: Viewport = {
@@ -21,9 +21,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased">
+      <head>
+        <link rel="stylesheet" href="/assets/css/app.css" />
+      </head>
+      <body className="antialiased site-layout">
         <Providers>{children}</Providers>
       </body>
     </html>
   );
 }
+
