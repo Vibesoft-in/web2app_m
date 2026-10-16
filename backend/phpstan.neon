@@ -1,0 +1,14 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app/
+
+    # Level 8 as required by project specification
+    level: 8
+
+    ignoreErrors:
+        - '#PHPDoc tag @var#'
+
+    checkMissingIterableValueType: false

@@ -1,0 +1,75 @@
+import { cookies } from "next/headers";
+
+const BACKEND_BASE_URL = process.env.BACKEND_API_URL || "http://127.0.0.1:8000";
+
+export interface ApiResponse<T = any> {
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+    details?: any;
+    errors?: Record<string, string[]>;
+  };
+  status: number;
+}
+
+export async function serverFetch<T = any>(
+  path: string,
+  options: RequestInit = {}
+): Promise<ApiResponse<T>> {
+  const cookieStore = cookies();
+  const token = cookieStore.get("auth_token")?.value;
+
+  const headers: Record<string, string> = {
+    "Accept": "application/json",
+    "Content-Type": "application/json",
+    ...(options.headers as Record<string, string>),
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const url = `${BACKEND_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+
+  try {
+    const res = await fetch(url, {
+      ...options,
+      headers,
+      cache: "no-store",
+    });
+
+    const contentType = res.headers.get("content-type");
+    let json: any = {};
+    if (contentType && contentType.includes("application/json")) {
+      json = await res.json();
+    } else {
+      const text = await res.text();
+      json = { message: text };
+    }
+
+    if (!res.ok) {
+      return {
+        error: json.error || {
+          code: json.code || "REQUEST_FAILED",
+          message: json.message || "Request failed",
+          errors: json.errors,
+        },
+        status: res.status,
+      };
+    }
+
+    return {
+      data: json as T,
+      status: res.status,
+    };
+  } catch (err: any) {
+    return {
+      error: {
+        code: "NETWORK_ERROR",
+        message: err.message || "Failed to connect to backend service.",
+      },
+      status: 503,
+    };
+  }
+}

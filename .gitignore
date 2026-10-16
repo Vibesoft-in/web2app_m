@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+backend/vendor/
+vendor/
+
+# Next.js
+.next/
+out/
+dashboard/.next/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+backend/.env
+backend/.env.backup
+
+# Databases & logs
+*.sqlite
+*.sqlite-journal
+backend/database/*.sqlite
+backend/database/*.sqlite-journal
+backend/storage/logs/
+backend/storage/framework/cache/
+backend/storage/framework/sessions/
+backend/storage/framework/views/
+backend/bootstrap/cache/*.php
+
+# Storage & artifacts
+backend/storage/app/
+backend/storage/app/build_workspace/
+backend/storage/app/tenants/
+*.apk
+*.aab
+*.ipa
+
+# Android & Keystores (sensitive credentials)
+*.keystore
+*.jks
+*.p12
+*.p8
+google-services.json
+GoogleService-Info.plist
+service-account*.json
+
+# OS & IDE files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

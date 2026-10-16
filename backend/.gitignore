@@ -1,0 +1,23 @@
+.env
+.env.backup
+storage/app/private/
+storage/logs/
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/testing/
+storage/framework/views/
+bootstrap/cache/
+vendor/
+node_modules/
+.phpunit.result.cache
+.phpunit.cache/
+
+# Secrets — never commit these
+*.jks
+*.keystore
+*.p12
+*.p8
+google-services.json
+GoogleService-Info.plist
+service-account*.json
+firebase-adminsdk*.json
